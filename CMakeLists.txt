@@ -17,8 +17,6 @@ add_library(VantaESP SHARED
 target_precompile_headers(VantaESP PRIVATE src/pch.h)
 
 target_compile_definitions(VantaESP PRIVATE
-    WIN32_LEAN_AND_MEAN
-    NOMINMAX
     UNICODE
     _UNICODE
 )
