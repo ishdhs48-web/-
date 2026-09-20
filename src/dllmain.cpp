@@ -610,7 +610,7 @@ static void gdi_hpbar(HDC hdc, int x,int y,int h, float ratio)
     HBRUSH bg = CreateSolidBrush(RGB(50,10,10));
     RECT rc={x-5,y,x-2,y+h}; FillRect(hdc,&rc,bg); DeleteObject(bg);
     // fill
-    int fill=max(1,(int)(h*ratio)), fy=y+h-fill;
+    int fill=std::max(1,(int)(h*ratio)), fy=y+h-fill;
     COLORREF fc = ratio>0.5f ? RGB(30,210,30) : (ratio>0.25f ? RGB(210,210,0) : RGB(210,40,40));
     HBRUSH fg = CreateSolidBrush(fc);
     RECT rf={x-5,fy,x-2,y+h}; FillRect(hdc,&rf,fg); DeleteObject(fg);
@@ -656,9 +656,9 @@ static void draw_entity(HDC hdc, const EntityData& e)
     if (!e.on_screen) return;
     if (!should_draw(e)) return;
 
-    float scale = 1800.f / max(1.f, e.distance);
-    int bh = max(18, (int)(scale * 1.8f));
-    int bw = max(10, (int)(bh * 0.45f));
+    float scale = 1800.f / std::max(1.f, e.distance);
+    int bh = std::max(18, (int)(scale * 1.8f));
+    int bw = std::max(10, (int)(bh * 0.45f));
     int bx = (int)e.sx - bw/2;
     int by = (int)e.sy - bh;
 
