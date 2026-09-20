@@ -894,7 +894,13 @@ static void overlay_thread_fn()
         if (g_target) break;
         Sleep(500);
     }
-    if (!g_target){ g_run.store(false); return; }
+    if (!g_target)
+    {
+        MessageBoxA(nullptr,"[VANTA] Game window NOT found","VANTA",MB_OK|MB_ICONERROR);
+        g_run.store(false); return;
+    }
+
+    MessageBoxA(nullptr,"[VANTA] Window found! Creating overlay...","VANTA",MB_OK);
 
     RECT wr{}; GetWindowRect(g_target,&wr);
     int wx=wr.left,wy=wr.top,ww=wr.right-wr.left,wh=wr.bottom-wr.top;
@@ -911,7 +917,12 @@ static void overlay_thread_fn()
         WS_EX_TOPMOST|WS_EX_LAYERED|WS_EX_TOOLWINDOW,
         L"VantaESP_Overlay",L"",WS_POPUP,
         wx,wy,ww,wh,nullptr,nullptr,wc.hInstance,nullptr);
-    if (!g_overlay){ g_run.store(false); return; }
+    if (!g_overlay)
+    {
+        MessageBoxA(nullptr,"[VANTA] CreateWindowEx FAILED","VANTA",MB_OK|MB_ICONERROR);
+        g_run.store(false); return;
+    }
+    MessageBoxA(nullptr,"[VANTA] Overlay created! Press INSERT in game.","VANTA",MB_OK);
 
     // Make overlay click-through manually after creation
     LONG ex = GetWindowLongW(g_overlay, GWL_EXSTYLE);
