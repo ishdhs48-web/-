@@ -1,0 +1,11 @@
+build/
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.suo
+*.user
+.vs/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
