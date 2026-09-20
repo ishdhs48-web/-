@@ -20,8 +20,6 @@
 #include <atomic>
 #include <mutex>
 #include <algorithm>
-#include <gdiplus.h>
-#pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "dwmapi.lib")
 #include <dwmapi.h>
 
@@ -505,7 +503,6 @@ static void collect()
 
             e.world_pos = read_position(pm);
             e.distance  = dist3(e.world_pos, cam_pos);
-            e.colour_calc:; // label below
             e.color     = e.is_local ? RGB(0,255,0) :
                           (e.dead    ? RGB(120,120,120) : RGB(80,200,255));
 
