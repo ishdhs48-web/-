@@ -804,11 +804,33 @@ static void menu_move(int delta)
 
 static void hotkey_thread_fn()
 {
+    // RegisterHotKey works regardless of which window has focus
+    // Use a hidden message window for hotkey messages
+    HWND msg_wnd = CreateWindowExW(0,L"STATIC",nullptr,0,0,0,0,0,
+                                    HWND_MESSAGE,nullptr,nullptr,nullptr);
+
+    RegisterHotKey(msg_wnd, 1, 0, VK_INSERT); // INSERT — menu toggle
+    RegisterHotKey(msg_wnd, 2, 0, VK_END);    // END — unload
+
+    MSG msg{};
     while (g_run.load())
     {
-        if (GetAsyncKeyState(VK_INSERT)&1)
-            g_menu_open.store(!g_menu_open.load());
+        // Non-blocking peek for hotkey messages
+        while (PeekMessageW(&msg, msg_wnd, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_HOTKEY)
+            {
+                if (msg.wParam == 1)
+                    g_menu_open.store(!g_menu_open.load());
+                if (msg.wParam == 2)
+                {
+                    g_run.store(false);
+                    if (g_overlay) PostMessage(g_overlay,WM_CLOSE,0,0);
+                }
+            }
+        }
 
+        // Numpad navigation — only when menu open, GetAsyncKeyState fine here
         if (g_menu_open.load())
         {
             if (GetAsyncKeyState(VK_NUMPAD8)&1) menu_move(-1);
@@ -819,13 +841,13 @@ static void hotkey_thread_fn()
                 if (b) b->store(!b->load());
             }
         }
-        if (GetAsyncKeyState(VK_END)&1)
-        {
-            g_run.store(false);
-            if (g_overlay) PostMessage(g_overlay,WM_CLOSE,0,0);
-        }
+
         Sleep(10);
     }
+
+    UnregisterHotKey(msg_wnd, 1);
+    UnregisterHotKey(msg_wnd, 2);
+    DestroyWindow(msg_wnd);
 }
 
 static void collect_thread_fn()
@@ -886,10 +908,14 @@ static void overlay_thread_fn()
     RegisterClassExW(&wc);
 
     g_overlay = CreateWindowExW(
-        WS_EX_TOPMOST|WS_EX_LAYERED|WS_EX_TRANSPARENT|WS_EX_TOOLWINDOW,
+        WS_EX_TOPMOST|WS_EX_LAYERED|WS_EX_TOOLWINDOW,
         L"VantaESP_Overlay",L"",WS_POPUP,
         wx,wy,ww,wh,nullptr,nullptr,wc.hInstance,nullptr);
     if (!g_overlay){ g_run.store(false); return; }
+
+    // Make overlay click-through manually after creation
+    LONG ex = GetWindowLongW(g_overlay, GWL_EXSTYLE);
+    SetWindowLongW(g_overlay, GWL_EXSTYLE, ex | WS_EX_TRANSPARENT | WS_EX_LAYERED);
 
     SetLayeredWindowAttributes(g_overlay,RGB(0,0,0),0,LWA_COLORKEY);
     MARGINS m{-1,-1,-1,-1}; DwmExtendFrameIntoClientArea(g_overlay,&m);
