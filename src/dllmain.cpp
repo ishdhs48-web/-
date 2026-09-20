@@ -866,7 +866,8 @@ static void overlay_thread_fn()
 {
     for (int i=0; i<120 && g_run.load(); ++i)
     {
-        g_target = FindWindowA(nullptr,"Len's Island");
+        g_target = FindWindowA(nullptr,"Muck");
+        if (!g_target) g_target = FindWindowA("Muck ",nullptr);
         if (!g_target) g_target = FindWindowA("UnityWndClass",nullptr);
         if (g_target) break;
         Sleep(500);
